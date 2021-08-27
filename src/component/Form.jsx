@@ -8,6 +8,7 @@ import firebaseConfig from '../config';
 initializeApp(firebaseConfig);
 
 const Form = () => {
+    const [loginInfo, setLoginInfo] = useState(false)
     const [checked, setChecked] = useState(false)
     const [user, setUser] = useState({
         username: '',
@@ -15,6 +16,7 @@ const Form = () => {
         password: '',
         error: '',
         success: false,
+        alert: ''
     })
     const provider = new GoogleAuthProvider();
     const { email, password } = user;
@@ -41,7 +43,7 @@ const Form = () => {
         }
         e.preventDefault();
     }
-    const googlehandle = () => {
+    const googleHandle = () => {
         const auth = getAuth();
         signInWithPopup(auth, provider)
             .then((result) => {
@@ -62,23 +64,33 @@ const Form = () => {
         if (isFieldValid) {
             const newUserInfo = { ...user }
             newUserInfo[e.target.name] = e.target.value;
+            newUserInfo.alert = ""
             setUser(newUserInfo)
+        } else {
+            const newUserAlert = { ...user }
+            newUserAlert.alert = "Please enter a valid Information"
+            setUser(newUserAlert)
         }
     }
     return (
         <>
+            {
+                loginInfo ? <h1 className="text-center pb-4 ">Login </h1> : <h1 className="text-center pb-4 ">Registration Form</h1>
+            }
             <form onSubmit={formHandelSubmit}>
-                <div className="form-group">
-                    <label htmlFor="fullname">User Name</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="fullname"
-                        onBlur={handelBlur}
-                        name="username"
-                        required
-                    />
-                </div>
+                {
+                    !loginInfo && <div className="form-group">
+                        <label htmlFor="fullname">User Name</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="fullname"
+                            onBlur={handelBlur}
+                            name="username"
+                            required
+                        />
+                    </div>
+                }
                 <div className="form-group">
                     <label htmlFor="email">Email address</label>
                     <input
@@ -101,41 +113,67 @@ const Form = () => {
                         name="password"
                     />
                 </div>
+                {
+                    !loginInfo && <div className="form-check form-check-inline pb-4">
+                        <input
+                            className="form-check-input checkbox"
+                            type="checkbox"
+                            id="terms"
+                            value="agree"
+                            name="checkbox"
+                            onChange={() => {
+                                setChecked(!checked)
+                            }}
+                        />
+                        <label
+                            className="form-check-label checkbox"
+                            htmlFor="terms">
+                            I agree all terms and conditions
+                        </label>
+                    </div>
+                }
                 <div className="form-check form-check-inline pb-4">
                     <input
                         className="form-check-input checkbox"
                         type="checkbox"
-                        id="terms"
-                        value="agree"
-                        onBlur={handelBlur}
+                        id="login"
+                        value="login"
                         name="checkbox"
-                        onChange={() => {
-                            setChecked(!checked)
-                        }}
+                        onChange={() => { setLoginInfo(!loginInfo) }}
                     />
                     <label
                         className="form-check-label checkbox"
-                        htmlFor="terms">
-                        I agree all terms and conditions
+                        htmlFor="login">
+                        Login
                     </label>
                 </div>
                 <div className="form-group ">
                     {
-                        checked ? <input
+                        //Login Handle Use
+                        loginInfo ? <input
                             type="submit"
-                            value="Submit"
+                            value="Login"
                             className="form-control btn btn-primary"
-                        /> : <input
-                            type="submit"
-                            value="Submit"
-                            className="form-control btn btn-primary"
-                            disabled
-                        />
+                        /> :
+                            //Submit Handle Use
+                            checked ? <input
+                                type="submit"
+                                value="Submit"
+                                className="form-control btn btn-primary"
+                            /> : <input
+                                type="submit"
+                                value="Submit"
+                                className="form-control btn btn-primary"
+                                disabled
+                            />
                     }
                 </div>
             </form>
-            <button className="btn btn-primary " onClick={googlehandle}>sign in with google</button>
+            {
+                !loginInfo && <button className="btn btn-primary " onClick={googleHandle}>sign in with google</button>
+            }
             <p className="pt-3 error">{user.error}</p>
+            <p className="pt-3 error">{user.alert}</p>
             {
                 user.success && <p className="pt-3 success">Registration successful</p>
             }
